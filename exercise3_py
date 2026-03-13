@@ -1,0 +1,168 @@
+class Post:
+    def __init__(self, post_id, user_id, content, timestamp, likes, comments, shares):
+        self.post_id = post_id
+        self.user_id = user_id
+        self.content = content
+        self.timestamp = timestamp
+        self.likes = likes
+        self.comments = comments
+        self.shares = shares
+        self.engagement_score = likes*1 + comments*2 + shares*3
+        self.next = None
+
+
+class PriorityQueue:
+    def __init__(self):
+        self.head = None
+        self.size = 0
+
+    # insert post maintaining sorted order
+    def enqueue(self, post):
+
+        if self.head is None or post.engagement_score > self.head.engagement_score:
+            post.next = self.head
+            self.head = post
+        else:
+            current = self.head
+
+            while current.next and current.next.engagement_score >= post.engagement_score:
+                current = current.next
+
+            post.next = current.next
+            current.next = post
+
+        self.size += 1
+
+    # remove highest priority post
+    def dequeue_max(self):
+
+        if self.head is None:
+            return None
+
+        removed = self.head
+        self.head = self.head.next
+        removed.next = None
+        self.size -= 1
+
+        return removed
+
+    # view highest priority post
+    def peek_max(self):
+        return self.head
+
+    # check if queue empty
+    def is_empty(self):
+        return self.head is None
+
+    # return number of posts
+    def get_size(self):
+        return self.size
+
+    # update engagement score and reposition post
+    def update_score(self, post_id, new_likes, new_comments, new_shares):
+
+        prev = None
+        current = self.head
+
+        while current:
+
+            if current.post_id == post_id:
+
+                # remove post
+                if prev:
+                    prev.next = current.next
+                else:
+                    self.head = current.next
+
+                self.size -= 1
+
+                # update engagement values
+                current.likes += new_likes
+                current.comments += new_comments
+                current.shares += new_shares
+
+                # recompute score
+                current.engagement_score = (
+                    current.likes*1 +
+                    current.comments*2 +
+                    current.shares*3
+                )
+
+                current.next = None
+
+                # reinsert
+                self.enqueue(current)
+                return
+
+            prev = current
+            current = current.next
+
+    # return top k posts
+    def get_top_k(self, k):
+
+        result = []
+        current = self.head
+        count = 0
+
+        while current and count < k:
+            result.append((current.post_id, current.engagement_score))
+            current = current.next
+            count += 1
+
+        return result
+
+    # reduce score for old posts
+    def decay_older_than(self, timestamp, decay_factor=0.8):
+
+        current = self.head
+        posts = []
+
+        while current:
+            posts.append(current)
+            current = current.next
+
+        self.head = None
+        self.size = 0
+
+        for post in posts:
+
+            if post.timestamp < timestamp:
+                post.engagement_score = int(post.engagement_score * decay_factor)
+
+            post.next = None
+            self.enqueue(post)
+
+    # display queue
+    def display(self):
+
+        current = self.head
+
+        while current:
+            print(f"Post {current.post_id} | User {current.user_id} | Score: {current.engagement_score}")
+            current = current.next
+
+
+# Example usage
+pq = PriorityQueue()
+
+p1 = Post(1, 101, "Post A", 10, 20, 5, 2)
+p2 = Post(2, 102, "Post B", 11, 10, 3, 1)
+p3 = Post(3, 103, "Post C", 12, 30, 4, 3)
+
+pq.enqueue(p1)
+pq.enqueue(p2)
+pq.enqueue(p3)
+
+print("Initial Queue:")
+pq.display()
+
+top = pq.peek_max()
+if top:
+    print("\nTop Post:", top.post_id)
+
+pq.update_score(2, 10, 0, 0)
+
+print("\nAfter Score Update:")
+pq.display()
+
+print("\nTop 2 Posts:", pq.get_top_k(2))
