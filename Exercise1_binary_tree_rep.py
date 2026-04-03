@@ -1,6 +1,3 @@
-# ============================================================
-# Exercise 1 — Binary Tree Representation of Content Categories
-# ============================================================
 
 class CategoryNode:
     def __init__(self, category_id, name, post_count):
@@ -15,9 +12,6 @@ class CategoryNode:
         return f"{self.name}({self.post_count})"
 
 
-# ============================================================
-# TREE METRIC CALCULATIONS
-# ============================================================
 
 def calculate_height(node):
     if node is None:
@@ -28,7 +22,6 @@ def calculate_height(node):
 
 
 def calculate_node_depth(node, target_id, depth=0):
-    # Returns depth (distance from root) of a target node
     if node is None:
         return -1
     if node.category_id == target_id:
@@ -40,7 +33,6 @@ def calculate_node_depth(node, target_id, depth=0):
 
 
 def calculate_node_height(node, target_id):
-    # Returns subtree height of the target node identified by category_id
     target_node = find_category(node, target_id)
     if target_node is None:
         return -1
@@ -74,12 +66,8 @@ def is_balanced(node):
     return result
 
 
-# ============================================================
-# TREE PROPERTY VERIFICATION
-# ============================================================
 
 def is_full_binary_tree(node):
-    # Every node has 0 or 2 children (never just 1)
     if node is None:
         return True
     if node.left is None and node.right is None:
@@ -90,15 +78,12 @@ def is_full_binary_tree(node):
 
 
 def is_perfect_binary_tree(node):
-    # All leaves at same level, all internal nodes have 2 children
     height = calculate_height(node)
     total  = count_nodes(node)
-    # A perfect binary tree with height h has 2^(h+1) - 1 nodes
     return total == (2 ** (height + 1)) - 1
 
 
 def is_complete_binary_tree(node):
-    # All levels full except possibly last, last level filled left to right
     if node is None:
         return True
 
@@ -125,9 +110,6 @@ def is_complete_binary_tree(node):
     return True
 
 
-# ============================================================
-# SEARCH AND NAVIGATION
-# ============================================================
 
 def find_category(node, target):
     if node is None:
@@ -192,28 +174,15 @@ def lowest_common_ancestor(node, value1, value2):
     left_lca  = lowest_common_ancestor(node.left,  value1, value2)
     right_lca = lowest_common_ancestor(node.right, value1, value2)
 
-    # One found in each subtree → current node is the LCA
     if left_lca and right_lca:
         return node
 
     return left_lca if left_lca else right_lca
 
 
-# ============================================================
-# TESTING WITH LAB EXAMPLE
-# ============================================================
 
 if __name__ == "__main__":
 
-    # Build the tree from the lab:
-    #
-    #          Technology(150)
-    #         /               \
-    #   Programming(85)      Design(65)
-    #      /       \          /      \
-    #  Python(42) Java(30) UI/UX(38) Graphics(22)
-    #   /     \
-    # Django(18) Flask(12)
 
     tech   = CategoryNode(1, "Technology",   150)
     prog   = CategoryNode(2, "Programming",   85)
@@ -225,7 +194,6 @@ if __name__ == "__main__":
     django = CategoryNode(8, "Django",         18)
     flask  = CategoryNode(9, "Flask",          12)
 
-    # Link structure
     tech.left    = prog
     tech.right   = design
     prog.left    = python
@@ -235,7 +203,6 @@ if __name__ == "__main__":
     python.left  = django
     python.right = flask
 
-    # Set parent references
     prog.parent   = tech
     design.parent = tech
     python.parent = prog
@@ -245,26 +212,19 @@ if __name__ == "__main__":
     django.parent = python
     flask.parent  = python
 
-    # ── Tree Metrics ──────────────────────────────────────────
     print("=" * 55)
     print("TREE METRICS")
     print("=" * 55)
     print(f"  Tree height              : {calculate_height(tech)}")
-    # Expected: 3
 
     print(f"  Depth of Java            : {calculate_node_depth(tech, java.category_id)}")
-    # Expected: 2
 
     print(f"  Total nodes              : {count_nodes(tech)}")
-    # Expected: 9
 
     print(f"  Leaf nodes               : {count_leaves(tech)}")
-    # Expected: 5 (Django, Flask, Java, UI/UX, Graphics)
 
     print(f"  Is balanced?             : {is_balanced(tech)}")
-    # Expected: True
 
-    # ── Tree Property Verification ────────────────────────────
     print()
     print("=" * 55)
     print("TREE PROPERTY VERIFICATION")
@@ -273,7 +233,6 @@ if __name__ == "__main__":
     print(f"  Is perfect binary tree?  : {is_perfect_binary_tree(tech)}")
     print(f"  Is complete binary tree? : {is_complete_binary_tree(tech)}")
 
-    # ── Search and Navigation ─────────────────────────────────
     print()
     print("=" * 55)
     print("SEARCH AND NAVIGATION")
@@ -281,16 +240,12 @@ if __name__ == "__main__":
 
     found = find_category(tech, "Python")
     print(f"  find_category('Python')              : {found}")
-    # Expected: Python(42)
 
     path = find_path_to_root(tech, "Django")
     print(f"  find_path_to_root('Django')          : {path}")
-    # Expected: ['Django', 'Python', 'Programming', 'Technology']
 
     lca = lowest_common_ancestor(tech, "Django", "Java")
     print(f"  lowest_common_ancestor(Django, Java) : {lca}")
-    # Expected: Programming
 
     lca2 = lowest_common_ancestor(tech, "Python", "Design")
     print(f"  lowest_common_ancestor(Python,Design): {lca2}")
-    # Expected: Technology
